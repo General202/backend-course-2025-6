@@ -1,8 +1,12 @@
-const { Command } = require('commander');
-const fs = require('fs');
-const path = require('path');
-const express = require('express');
-const multer = require('multer');
+import { Command } from 'commander';
+import fs from 'fs';
+import path from 'path';
+import express from 'express';
+import multer from 'multer';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 const program = new Command();
 
@@ -50,6 +54,7 @@ function saveInventory() {
 
 const app = express();
 app.use(express.json());
+app.use(express.urlencoded());
 
 const uploadDir = path.join(cache, 'uploads');
 
@@ -148,6 +153,32 @@ app.delete("/inventory/:id", (req, res) => {
   saveInventory();
 
   res.status(200).json(item);
+});
+
+app.get('/RegisterForm.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'RegisterForm.html'));
+});
+
+app.get('/SearchForm.html', (req, res) => {
+  res.sendFile(path.join(__dirname, 'SearchForm.html'));
+});
+
+app.get('/search', (req, res) => {
+  const {id , includePhoto} = req.query;
+
+  const itemId = parseInt(id);
+  const hasPhoto = includePhoto === 'true';
+  const item = inventory.find(item => item.id === itemId);
+
+  if (!item) return res.status(404).send('Not found');
+
+  const absolutePath = path.join(uploadDir, item.photo);
+  res.status(200).json({
+    id: item.id,
+    name: item.name,
+    description: item.description,
+    photo: hasPhoto ? absolutePath : null
+  });
 });
 
 app.listen(port, host, () => {
