@@ -51,12 +51,20 @@ function saveInventory() {
 const app = express();
 app.use(express.json());
 
-app.use((req, res, next) => {
-  res.setHeader('Content-Type', 'application/json; charset=utf-8');
-  next();
+const uploadDir = path.join(cache, 'uploads');
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname) || '.jpg';
+    const filename = Date.now() + ext;
+    cb(null, filename);
+  }
 });
 
-const upload = multer({ dest: path.join(cache, 'uploads') });
+const upload = multer({ storage });
 
 app.post('/register', upload.single('photo'), (req, res) => {
   const { inventory_name, description } = req.body;
@@ -65,7 +73,7 @@ app.post('/register', upload.single('photo'), (req, res) => {
     id: idCounter++,
     name: inventory_name,
     description: description || '',
-    photo: req.file ? req.file.path : null
+    photo: req.file ? req.file.filename : null
   };
   inventory.push(item);
   saveInventory();
@@ -73,13 +81,13 @@ app.post('/register', upload.single('photo'), (req, res) => {
 });
 
 app.get('/inventory', (req, res) => {
-res.json(inventory.map(i => ({ id: i.id, name: i.name, description: i.description, photo: `/inventory/${i.id}/photo` })));
+res.status(200).json(inventory);
 });
 
 app.get('/inventory/:id', (req, res) => {
 const item = inventory.find(i => i.id == req.params.id);
 if (!item) return res.status(404).send('Not found');
-res.json({ ...item, photo: `/inventory/${item.id}/photo` });
+res.status(200).json(item);
 });
 
 app.put('/inventory/:id', (req, res) => {
@@ -88,7 +96,58 @@ app.put('/inventory/:id', (req, res) => {
   const { name, description } = req.body;
   if (name) item.name = name;
   if (description) item.description = description;
-  res.json(item);
+  res.status(200).json(item);
+});
+
+app.get('/inventory/:id/photo', (req, res) => {
+  const item = inventory.find(i => i.id == req.params.id);
+  if (!item || !item.photo) {
+    return res.status(404).send('Photo not found');
+  }
+
+  const photoPath = path.resolve(uploadDir, item.photo);
+
+  if (!fs.existsSync(photoPath)) {
+    return res.status(404).send('Photo not found');
+  }
+
+  res.sendFile(photoPath);
+});
+
+app.put('/inventory/:id/photo', upload.single('photo'), (req, res) => {
+  const item = inventory.find(i => i.id == req.params.id);
+  if (!item) return res.status(404).send("Not Found");
+
+  if (!req.file) return res.status(400).send("Missing photo");
+
+  if (item.photo) {
+    const oldPath = path.resolve(uploadDir, item.photo);
+    if (fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
+  }
+
+  item.photo = req.file.filename;
+  saveInventory();
+
+  res.status(200).json(item);
+});
+
+app.delete("/inventory/:id", (req, res) => {
+  const id = Number(req.params.id);
+  const index = inventory.findIndex(i => i.id === id);
+
+  if (index === -1) return res.status(404).send("Not Found");
+
+  const item = inventory[index];
+
+  if (item.photo) {
+    const photoPath = path.resolve(uploadDir, item.photo);
+    if (fs.existsSync(photoPath)) fs.unlinkSync(photoPath);
+  }
+
+  inventory.splice(index, 1);
+  saveInventory();
+
+  res.status(200).json(item);
 });
 
 app.listen(port, host, () => {
