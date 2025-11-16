@@ -2,6 +2,8 @@ const { Command } = require('commander');
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
+const express = require('express');
+const multer = require('multer');
 
 const program = new Command();
 
@@ -24,10 +26,33 @@ if (!fs.existsSync(cache)) {
   }
 }
 
-const server = http.createServer((req, res) => {
-  res.writeHead(200, { 'Content-Type': 'text/plain' });
-  res.end('Server is running');
+const app = express();
+app.use(express.json());
+
+app.use((req, res, next) => {
+  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  next();
 });
+
+
+const upload = multer({ dest: path.join(cache, 'uploads') });
+let inventory = [];
+let idCounter = 1;
+
+app.post('/register', upload.single('photo'), (req, res) => {
+  const { inventory_name, description } = req.body;
+  if (!inventory_name) return res.status(400).send('Missing inventory_name');
+  const item = {
+    id: idCounter++,
+    name: inventory_name,
+    description: description || '',
+    photo: req.file ? req.file.path : null
+  };
+  inventory.push(item);
+  res.json(item);
+});
+
+const server = http.createServer(app);
 
 server.listen(port, host, () => {
   console.log(`Server running at http://${host}:${port}`);
