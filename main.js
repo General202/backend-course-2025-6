@@ -82,6 +82,15 @@ if (!item) return res.status(404).send('Not found');
 res.json({ ...item, photo: `/inventory/${item.id}/photo` });
 });
 
+app.put('/inventory/:id', (req, res) => {
+  const item = inventory.find(i => i.id == req.params.id);
+  if (!item) return res.status(404).send('Not found');
+  const { name, description } = req.body;
+  if (name) item.name = name;
+  if (description) item.description = description;
+  res.json(item);
+});
+
 app.listen(port, host, () => {
   console.log(`Server running at http://${host}:${port}`);
 });
