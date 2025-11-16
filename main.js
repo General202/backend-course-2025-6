@@ -52,6 +52,10 @@ app.post('/register', upload.single('photo'), (req, res) => {
   res.json(item);
 });
 
+app.get('/inventory', (req, res) => {
+res.json(inventory.map(i => ({ id: i.id, name: i.name, description: i.description, photo: `/inventory/${i.id}/photo` })));
+});
+
 const server = http.createServer(app);
 
 server.listen(port, host, () => {
