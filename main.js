@@ -4,9 +4,13 @@ import path from 'path';
 import express from 'express';
 import multer from 'multer';
 import { fileURLToPath } from 'url';
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'yamljs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+const swaggerDocument = YAML.load(path.join(__dirname, 'openapi.yaml'));
 
 const program = new Command();
 
@@ -55,6 +59,7 @@ function saveInventory() {
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded());
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 const uploadDir = path.join(cache, 'uploads');
 
