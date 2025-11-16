@@ -1,0 +1,256 @@
+{
+	"info": {
+		"_postman_id": "36c9fb40-21a3-46a2-9e51-6ad7b014bd1b",
+		"name": "Inventory API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "50108964",
+		"_collection_link": "https://general202-9413909.postman.co/workspace/71eee206-ca9a-4b1b-8b33-0f57d16d0bd6/collection/50108964-36c9fb40-21a3-46a2-9e51-6ad7b014bd1b?action=share&source=collection_link&creator=50108964"
+	},
+	"item": [
+		{
+			"name": "POST /register",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "inventory_name",
+							"value": "Laptop",
+							"type": "text"
+						},
+						{
+							"key": "description",
+							"value": "13-inch ultrabook",
+							"type": "text"
+						},
+						{
+							"key": "photo",
+							"type": "file",
+							"src": "sample.jpg"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{baseUrl}}/register",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"register"
+					]
+				},
+				"description": "Create new inventory item"
+			},
+			"response": []
+		},
+		{
+			"name": "GET /inventory",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/inventory",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"inventory"
+					]
+				},
+				"description": "Get all items"
+			},
+			"response": []
+		},
+		{
+			"name": "GET /inventory/:id",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/inventory/1",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"inventory",
+						"1"
+					]
+				},
+				"description": "Get item by id"
+			},
+			"response": []
+		},
+		{
+			"name": "PUT /inventory/:id",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"name\":\"new\",\n  \"description\":\"updated description\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/inventory/1",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"inventory",
+						"1"
+					]
+				},
+				"description": "Update item"
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE /inventory/:id",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/inventory/1",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"inventory",
+						"1"
+					]
+				},
+				"description": "Delete item"
+			},
+			"response": []
+		},
+		{
+			"name": "GET /inventory/:id/photo",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "*/*"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/inventory/1/photo",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"inventory",
+						"1",
+						"photo"
+					]
+				},
+				"description": "Download photo"
+			},
+			"response": []
+		},
+		{
+			"name": "PUT /inventory/:id/photo",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "photo",
+							"type": "file",
+							"src": "sample.jpg"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{baseUrl}}/inventory/1/photo",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"inventory",
+						"1",
+						"photo"
+					]
+				},
+				"description": "Replace photo"
+			},
+			"response": []
+		},
+		{
+			"name": "GET /search",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/search?id=1&includePhoto=true",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"search"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "1"
+						},
+						{
+							"key": "includePhoto",
+							"value": "true"
+						}
+					]
+				},
+				"description": "Search item by id with optional photo path"
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000"
+		}
+	]
+}
