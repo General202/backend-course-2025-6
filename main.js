@@ -5,12 +5,10 @@ import express from 'express';
 import multer from 'multer';
 import { fileURLToPath } from 'url';
 import swaggerUi from 'swagger-ui-express';
-import YAML from 'yamljs';
+
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-
-const swaggerDocument = YAML.load(path.join(__dirname, 'openapi.yaml'));
 
 const program = new Command();
 
@@ -56,10 +54,148 @@ function saveInventory() {
   );
 }
 
+const swaggerSpec = {
+  openapi: "3.0.0",
+  info: {
+    title: "Inventory API",
+    version: "1.0.0"
+  },
+  paths: {
+    "/register": {
+      post: {
+        summary: "Create item",
+        description: "Create a new inventory item with optional photo",
+        requestBody: {
+          content: {
+            "multipart/form-data": {
+              schema: {
+                type: "object",
+                properties: {
+                  inventory_name: { type: "string" },
+                  description: { type: "string" },
+                  photo: { type: "string", format: "binary" }
+                }
+              }
+            }
+          }
+        },
+        responses: {
+          "200": { description: "Item created" }
+        }
+      }
+    },
+
+    "/inventory": {
+      get: {
+        summary: "Get all items",
+        responses: {
+          "200": { description: "OK" }
+        }
+      }
+    },
+
+    "/inventory/{id}": {
+      get: {
+        summary: "Get item",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "integer" }
+          }
+        ],
+        responses: { "200": { description: "OK" } }
+      },
+
+      put: {
+        summary: "Update item",
+        description: "Update item fields",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "integer" }
+          }
+        ],
+        requestBody: {
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  name: { type: "string" },
+                  description: { type: "string" },
+                }
+              }
+            }
+          }
+        },
+        responses: { "200": { description: "Updated" } }
+      },
+
+      delete: {
+        summary: "Delete item",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "integer" }
+          }
+        ],
+        responses: { "200": { description: "Deleted" } }
+      }
+    },
+
+    "/inventory/{id}/photo": {
+      get: {
+        summary: "Get photo",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "integer" }
+          }
+        ],
+        responses: { "200": { description: "OK" } }
+      },
+
+      put: {
+        summary: "Update photo",
+        description: "Upload new image",
+        parameters: [
+          {
+            name: "id",
+            in: "path",
+            required: true,
+            schema: { type: "integer" }
+          }
+        ],
+        requestBody: {
+          content: {
+            "multipart/form-data": {
+              schema: {
+                type: "object",
+                properties: {
+                  photo: { type: "string", format: "binary" }
+                }
+              }
+            }
+          }
+        },
+        responses: { "200": { description: "Photo updated" } }
+      }
+    },
+  }
+};
+
 const app = express();
 app.use(express.json());
 app.use(express.urlencoded());
-app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 const uploadDir = path.join(cache, 'uploads');
 
